@@ -19,7 +19,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
     List<Rule> ruleList;
     @Override
     public void onReceive(Context context, Intent intent) {
-        List<Intent> thenIntents = new ArrayList<Intent>();
+        List<Intent> thenIntents = new ArrayList<>();
         try {
             FileInputStream fis = context.openFileInput(Constants.RULES_FILE);
             ObjectInputStream is = new ObjectInputStream(fis);
@@ -31,9 +31,7 @@ public class MyBroadcastReceiver extends BroadcastReceiver {
             Log.e("MyBroadcastReceiver", "file not found");
             e.printStackTrace();
         }
-        catch (IOException e){
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        catch (IOException | ClassNotFoundException e){
             e.printStackTrace();
         }
         for(Rule rule : ruleList){

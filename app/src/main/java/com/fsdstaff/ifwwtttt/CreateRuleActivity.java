@@ -21,12 +21,12 @@ public class CreateRuleActivity extends AppCompatActivity {
     private LinearLayout homeLayout;
     HashMap<String, App> appMap;
     MySpinner appSpinner;
+    Button registerButton;
+    Rule rule;
+
+    /* Yet to be used */
     List<Operator> operatorList;
     Spinner operatorSpinner;
-    TextView compareTv;
-    Button registerButton;
-    App chosenApp;
-    Rule rule;
 
 
 
