@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.fsdstaff.ifwwtttt.RuleGrammar.Operator;
 
@@ -20,13 +19,13 @@ import java.util.List;
 public class CreateRuleActivity extends AppCompatActivity {
     private LinearLayout homeLayout;
     HashMap<String, App> appMap;
-    MySpinner appSpinner;
+    CreateRuleSpinner appSpinner;
+    Button registerButton;
+    Rule rule;
+
+    /* Yet to be used */
     List<Operator> operatorList;
     Spinner operatorSpinner;
-    TextView compareTv;
-    Button registerButton;
-    App chosenApp;
-    Rule rule;
 
 
 
@@ -36,12 +35,12 @@ public class CreateRuleActivity extends AppCompatActivity {
         populateApps();
         rule = new Rule(appMap);
         homeLayout = (LinearLayout) findViewById(R.id.HomeLayout);
-        MySpinnerListener appListener = new MySpinnerListener(appMap, rule,
+        CreateRuleListener appListener = new CreateRuleListener(appMap, rule,
                 homeLayout);
-        appSpinner = new MySpinner(this);
+        appSpinner = new CreateRuleSpinner(this);
         appSpinner.setName("Choose If - App")
                 .setItems(new ArrayList<Object>(appMap.values()))
-                .setType(MySpinner.Type.IF_APP)
+                .setType(CreateRuleSpinner.Type.IF_APP)
                 .setOnItemSelectedListener(appListener);
 
         addRegisterButton();

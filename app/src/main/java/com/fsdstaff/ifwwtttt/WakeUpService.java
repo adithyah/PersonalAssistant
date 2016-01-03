@@ -12,14 +12,14 @@ import java.util.List;
  * Created by adithyah on 12/14/15.
  */
 
-public class MyService extends Service {
-    MyBroadcastReceiver myReceiver;
+public class WakeUpService extends Service {
+    WakeUpReceiver myReceiver;
     IntentFilter myReceiverActions;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        myReceiver = new MyBroadcastReceiver();
+        myReceiver = new WakeUpReceiver();
         myReceiverActions = new IntentFilter();
     }
 

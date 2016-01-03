@@ -5,12 +5,10 @@ import java.util.List;
 /**
  * Created by adithyah on 12/18/15.
  */
-public abstract class Feature {
+public class Feature {
     String name;
     List<String> actions;
     List<String> values;
-
-    public abstract boolean checkValue(String checkVal);
 
     public String getName() {
         return name;

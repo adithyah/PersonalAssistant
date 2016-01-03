@@ -2,7 +2,7 @@ package com.fsdstaff.ifwwtttt.RuleGrammar;
 
 import android.app.AlarmManager;
 
-import com.fsdstaff.ifwwtttt.MyCalendar;
+import com.fsdstaff.ifwwtttt.CalendarHelper;
 
 import java.io.Serializable;
 import java.util.Calendar;
@@ -15,7 +15,6 @@ public class When implements Serializable {
     private String min;
     private String interval;
     public static final long TIME_FUZZY_LIMIT = 1000 * 60 * 5;//5 mins
-
 
     public static final String[] HOURS = {
             "00","01","02","03","04","05","06","07","08","09","10","11",
@@ -52,11 +51,8 @@ public class When implements Serializable {
     }
 
     public boolean check(){
-        Calendar tCal = MyCalendar.convertTimeToCal(getTriggerTime());
+        Calendar tCal = CalendarHelper.convertTimeToCal(getTriggerTime());
         Calendar pCal = Calendar.getInstance();
-        if(pCal.compareTo(tCal) < TIME_FUZZY_LIMIT){
-            return true;
-        }
-        return false;
+        return pCal.compareTo(tCal) < TIME_FUZZY_LIMIT;
     }
 }
