@@ -1,0 +1,113 @@
+<rule> = <if><when><where>then<do>
+    <if> = <choose app><condition>
+        <condition> = <choose feature> <operator.arith> <compare value> <operator.rel> <condition>
+        <choose feature> = <intent filters | json return parameters>
+        <compare value> = number | string
+    <when> = <absolute | intuitive | none>
+        <absolute> = <time of the day> | <time with enabled days>
+        <intuitive> = <daily | weekly | monthly | yearly>
+    <where> = <current location> | <location on map>
+    <do> = same as <if> except <change value> instead of <compare value>
+- Rules
+    - Categories
+        - location based
+        - time based
+        - if i get a message from him, vibrate phone and forward to gmail
+        - if it is his bday in facebook, send him a greeting
+    - rule operator
+
+Components
+- Configuration
+    - apps supported
+        - every feature should be checked for extra data
+    - specify rules
+    - Rule compilation phase
+- Execution
+    - background
+    - single service for all rules
+    - when to wakeup the service?
+        - depends on each rule
+            - <when>
+            - <where> should periodically check location
+            - <choose feature> will determine how often and when to wake up
+            -
+    - wait for the if condition to be true
+    - broadcast receiver will receive all types of messages
+        and dispatch accordingly
+    -
+walk through
+    - configuration
+        - user specifies rules
+        - save rules
+        - modify and register alarmManager if needed
+        - accordingly modify broadcast receiver and register again
+    - execution
+        - onReceive check all rules' condition
+            - first check the rules that do not require to start activity
+            - first check <when>
+                - rule.get_when() and check
+            - then check <where>
+                - rule.get_where() and check
+            - then check <if>
+                - rule.check_if()
+        - start service
+            - if the conditions are true, start service
+                - rule.get_intent() and start service
+        - service will cycle through the rules and perform actions
+
+Main class
+    - list of Rule objects
+    - on close the rule objects have to be written to disk
+When
+    - ALL
+    - ABSOLUTE
+    - INTUITIVE
+    - CUSTOM
+        - when i wake up
+
+App class - abstract class
+    - name
+    - AppFeature object
+        - name
+        - condition check(operator , compare value)
+        - can auto generate these objects
+            - from the json return parameters
+        - perform action(intent)
+    - check if you need the web api or work with intents
+    - <do>
+        - actions supported
+AppFeature class - abstract class
+    - condition_check(operator, compare value)
+
+Rule Class/
+    - ifAppFeature - appFeature.check_condition()
+        -
+    - doApp -
+    - when
+    - where
+Rule Operator class
+    - Arith
+    - Rel
+
+
+Future proofing
+- ability to specify more configuration parameters
+    - screen layout should be dictated not by xml but by java code
+- adding new apps
+- adding new rule operators
+- support new apis (fb, google, weather)
+
+
+questions:
+- need all intent categories
+- all broadcast receiver categories
+http://developer.android.com/reference/android/content/Intent.html
+- if picture taken upload to drive - how???
+    - the parameter passed to action (upload to drive)
+        - taken from if condition
+- is it possible to know the action that triggered the intent?
+    - yes intent.getAction()
+
+
+secondary implementations:
+Rule operators
