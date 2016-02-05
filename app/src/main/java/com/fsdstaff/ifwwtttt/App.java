@@ -1,18 +1,21 @@
 package com.fsdstaff.ifwwtttt;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.widget.LinearLayout;
 
-import com.fsdstaff.ifwwtttt.RuleGrammar.If;
+import com.fsdstaff.ifwwtttt.RuleGrammar.IfThen;
 
-import java.util.HashMap;
+import java.io.Serializable;
 
 /**
  * Created by adithyah on 12/6/15.
  */
-public abstract class App{
-    String name;
-    HashMap<String, Feature> ifFeature;
-    HashMap<String, Feature> thenFeature;
+public abstract class App {
+    protected String name;
 
     public String getName(){
         return name;
@@ -22,24 +25,32 @@ public abstract class App{
         return name;
     }
 
-    public HashMap<String, Feature> getIfFeature() {
-        return ifFeature;
-    }
+    /**
+     *
+     * @param ifThenType
+     * @param pLayout
+     */
+    public abstract void scanLayoutComponents(IfThen.Type ifThenType, LinearLayout pLayout, Rule rule);
 
-    public HashMap<String, Feature> getThenFeature() {
-        return thenFeature;
-    }
-
+    /**
+     * Called from CreateRuleListener
+     * Apps have different requirements to be configured
+     * use this function to create new components and display
+     * @param ifThenType    Type of Spinner that called this function (if or then)
+     * @param pLayout       parent layout - use this to add new components
+     */
+    public abstract void addLayoutComponents(IfThen.Type ifThenType, LinearLayout pLayout);
     /**
      * Called from the broadcastReceiver
      * an action to be executed as a result of a successful "if" condition
      * any info required from the "if" is found in the bdIntent
      *
-     * @param   fName       name of the feature in the App
+     * @param   then        "then" action to be performed
      * @param   bdIntent    the intent that triggered the broadcast receiver
+     * @param   context     context from the calling broadcastReceiver
      * @return              an action in the inform of intent, to be executed
      */
-    public abstract Intent getThenIntent(String fName, Intent bdIntent);
+    public abstract Intent getThenIntent(Context context, IfThen then, Intent bdIntent);
 
     /**
      * Called from the broadcastReceiver.
@@ -48,8 +59,11 @@ public abstract class App{
      *
      * @param   ifCond      "if" condition to be checked
      * @param   bdIntent    the intent that triggered the broadcast receiver
+     * @param   context     context from the calling broadcastReceiver
      * @return              "if" condition passes or fails
      */
-    public abstract boolean checkIf(If ifCond, Intent bdIntent);
+    public abstract boolean checkIf(Context context, IfThen ifCond, Intent bdIntent);
+
+    public abstract App getInstance();
 
 }

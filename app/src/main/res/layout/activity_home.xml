@@ -16,5 +16,6 @@
         android:id="@+id/CreateRule"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text = "Create Rule" />
+        android:text = "Create Rule"
+        android:onClick="createRule"/>
 </LinearLayout>

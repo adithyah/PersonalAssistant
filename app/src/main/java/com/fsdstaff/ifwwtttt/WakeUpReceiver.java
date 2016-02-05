@@ -10,6 +10,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -19,7 +20,9 @@ public class WakeUpReceiver extends BroadcastReceiver {
     List<Rule> ruleList;
     @Override
     public void onReceive(Context context, Intent intent) {
+        Log.d(Constants.DEBUG, "calling WakeUpReceiver");
         List<Intent> thenIntents = new ArrayList<>();
+        HashMap<String, App> appMap = new HashMap<>();
         try {
             FileInputStream fis = context.openFileInput(Constants.RULES_FILE);
             ObjectInputStream is = new ObjectInputStream(fis);
@@ -38,10 +41,10 @@ public class WakeUpReceiver extends BroadcastReceiver {
             if(!rule.checkWhen()){
                 continue;
             }
-            if(!rule.checkIf(intent)){
+            if(!rule.checkIf(context, intent, appMap)){
                 continue;
             }
-            thenIntents.add(rule.getThenIntent(intent));
+            thenIntents.add(rule.getThenIntent(context, intent, appMap));
         }
         context.startActivities((Intent[]) thenIntents.toArray());
     }

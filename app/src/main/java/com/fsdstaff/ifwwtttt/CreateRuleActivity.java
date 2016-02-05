@@ -3,25 +3,33 @@ package com.fsdstaff.ifwwtttt;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 import android.widget.Spinner;
 
+import com.fsdstaff.ifwwtttt.RuleGrammar.IfThen;
 import com.fsdstaff.ifwwtttt.RuleGrammar.Operator;
+import com.fsdstaff.ifwwtttt.RuleGrammar.When;
+import com.fsdstaff.ifwwtttt.WeatherAPI.WeatherApp;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class CreateRuleActivity extends AppCompatActivity {
-    private LinearLayout homeLayout;
     HashMap<String, App> appMap;
-    CreateRuleSpinner appSpinner;
-    Button registerButton;
     Rule rule;
+    EditText ruleNameText;
+    LinearLayout ifLayout;
+    LinearLayout whenLayout;
+    LinearLayout thenLayout;
+    CreateRuleSpinner ifAppSpinner;
+    CreateRuleSpinner hourSpinner;
+    CreateRuleSpinner minSpinner;
+    CreateRuleSpinner intervalSpinner;
+    CreateRuleSpinner thenAppSpinner;
 
     /* Yet to be used */
     List<Operator> operatorList;
@@ -32,41 +40,79 @@ public class CreateRuleActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_create_rule);
+        appMap                              = new HashMap<>();
         populateApps();
-        rule = new Rule(appMap);
-        homeLayout = (LinearLayout) findViewById(R.id.HomeLayout);
-        CreateRuleListener appListener = new CreateRuleListener(appMap, rule,
-                homeLayout);
-        appSpinner = new CreateRuleSpinner(this);
-        appSpinner.setName("Choose If - App")
+        rule                                = new Rule();
+        ruleNameText                        = (EditText) findViewById(R.id.ruleNameText);
+        ifLayout                            = (LinearLayout) findViewById(R.id.ifLayout);
+        whenLayout                          = (LinearLayout) findViewById(R.id.whenLayout);
+        thenLayout                          = (LinearLayout) findViewById(R.id.thenLayout);
+        ifAppSpinner                        = new CreateRuleSpinner(this);
+        hourSpinner                         = new CreateRuleSpinner(this);
+        minSpinner                          = new CreateRuleSpinner(this);
+        intervalSpinner                     = new CreateRuleSpinner(this);
+        thenAppSpinner                      = new CreateRuleSpinner(this);
+        CreateRuleListener ifAppListener    = new CreateRuleListener(appMap, rule, ifLayout, IfThen.Type.IF);
+        CreateRuleListener thenAppListener  = new CreateRuleListener(appMap, rule, thenLayout, IfThen.Type.THEN);
+
+        ifAppSpinner.setName("Choose If - App")
                 .setItems(new ArrayList<Object>(appMap.values()))
                 .setType(CreateRuleSpinner.Type.IF_APP)
-                .setOnItemSelectedListener(appListener);
+                .setOnItemSelectedListener(ifAppListener);
+        hourSpinner.setName("Choose When - Hour")
+                .setItems(new ArrayList<Object>(Arrays.asList(When.HOURS)))
+                .setType(CreateRuleSpinner.Type.IF_HOUR);
+        minSpinner.setName("Choose When - Min")
+                .setItems(new ArrayList<Object>(Arrays.asList(When.MINS)))
+                .setType(CreateRuleSpinner.Type.IF_MIN);
+        intervalSpinner.setName("Choose When - Interval")
+                .setItems(new ArrayList<Object>(Arrays.asList(When.INTERVALS)))
+                .setType(CreateRuleSpinner.Type.IF_INTERVAL);
+        thenAppSpinner.setName("Choose Then - App")
+                .setItems(new ArrayList<Object>(appMap.values()))
+                .setType(CreateRuleSpinner.Type.THEN_APP)
+                .setOnItemSelectedListener(thenAppListener);
 
-        addRegisterButton();
+        ifLayout.addView(ifAppSpinner);
+        whenLayout.addView(hourSpinner);
+        whenLayout.addView(minSpinner);
+        whenLayout.addView(intervalSpinner);
+        thenLayout.addView(thenAppSpinner);
 
-        setContentView(R.layout.activity_create_rule);
     }
 
-    private void addRegisterButton(){
-        registerButton = new Button(this);
-        registerButton.setText("Register");
-        registerButton.setWidth(LayoutParams.WRAP_CONTENT);
-        registerButton.setHeight(LayoutParams.WRAP_CONTENT);
-        registerButton.setGravity(Gravity.BOTTOM);
-        homeLayout.addView(registerButton);
+    public void registerOnClick(View view){
+        if(rule.getIfCond() != null) {
+            App chosenIfApp = appMap.get(rule.getIfCond().getChosenApp());
+            chosenIfApp.scanLayoutComponents(IfThen.Type.IF, ifLayout, rule);
+        }
 
-    }
+        String ruleName = ruleNameText.getText().toString();
+        rule.setName(ruleName);
 
-    protected void registerOnClick(View view){
+        App chosenThenApp = appMap.get(rule.getThen().getChosenApp());
+        chosenThenApp.scanLayoutComponents(IfThen.Type.THEN, thenLayout, rule);
+
+        scanWhenLayout();
+
         Intent result = new Intent(this, HomeActivity.class);
-        //set parameters of rules
         result.putExtra(Constants.NEW_RULE, rule);
         setResult(Constants.CREATE_RULE_CODE, result);
         finish();
     }
 
-    private void populateApps(){
+    protected void scanWhenLayout(){
+        When when = new When();
+        when.setHour(hourSpinner.getSelectedItem().toString());
+        when.setMin(minSpinner.getSelectedItem().toString());
+        when.setInterval(intervalSpinner.getSelectedItem().toString());
+        rule.setWhen(when);
+    }
 
+    private void populateApps(){
+        //TODO
+        App weather = new WeatherApp();
+        appMap.put(weather.getClass().getCanonicalName(), weather);
     }
 }

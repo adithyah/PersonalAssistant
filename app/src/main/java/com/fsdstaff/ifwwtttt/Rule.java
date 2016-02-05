@@ -1,14 +1,14 @@
 package com.fsdstaff.ifwwtttt;
 
+import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
-import com.fsdstaff.ifwwtttt.App;
-import com.fsdstaff.ifwwtttt.Feature;
-import com.fsdstaff.ifwwtttt.RuleGrammar.If;
-import com.fsdstaff.ifwwtttt.RuleGrammar.Then;
+import com.fsdstaff.ifwwtttt.RuleGrammar.IfThen;
 import com.fsdstaff.ifwwtttt.RuleGrammar.When;
 
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,16 +16,21 @@ import java.util.List;
  * Created by adithyah on 12/6/15.
  */
 public class Rule implements Serializable {
-    If ifCond;
+    IfThen ifCond;
     When when;
-    Then then;
-    HashMap<String, App> appMap;
+    IfThen then;
+    String name;
 
-    public Rule(HashMap<String, App> appMap) {
-        this.appMap = appMap;
+    public String getName() {
+        return name;
     }
 
-    public If getIfCond() {
+    public Rule setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public IfThen getIfCond() {
         return ifCond;
     }
 
@@ -33,11 +38,11 @@ public class Rule implements Serializable {
         return when;
     }
 
-    public Then getThen() {
+    public IfThen getThen() {
         return then;
     }
 
-    public void setIfCond(If ifCond) {
+    public void setIfCond(IfThen ifCond) {
         this.ifCond = ifCond;
     }
 
@@ -45,28 +50,53 @@ public class Rule implements Serializable {
         this.when = when;
     }
 
-    public void setThen(Then then) {
+    public void setThen(IfThen then) {
         this.then = then;
     }
 
-    public List<String> getIfActionList(){
-        App app = appMap.get(ifCond.getChosenApp());
-        Feature feature = app.getIfFeature().get(ifCond.getFeature());
-        return feature.getActions();
+    public List<String> getIfBdEventList(){
+        return ifCond.getBdEventList();
     }
 
-    public Intent getThenIntent(Intent intent){
-        App app = appMap.get(then.getChosenApp());
-        return app.getThenIntent(then.getFeature(), intent);
+    public Intent getThenIntent(Context context, Intent intent, HashMap<String, App> appMap){
+        App thenApp = getAppInstance(context, then.getChosenApp(), appMap);
+        return thenApp.getThenIntent(context, then, intent);
     }
 
-    public boolean checkIf(Intent bdIntent){
-        App app = appMap.get(ifCond.getChosenApp());
-        return app.checkIf(ifCond, bdIntent);
+    public boolean checkIf(Context context, Intent bdIntent, HashMap<String, App> appMap){
+        if(ifCond != null) {
+            App ifApp = getAppInstance(context, ifCond.getChosenApp(), appMap);
+            return ifApp.checkIf(context, ifCond, bdIntent);
+        }
+        return true;
     }
 
     public boolean checkWhen(){
         return when.check();
+    }
+
+    private App getAppInstance(Context context, String appName, HashMap<String, App> appMap){
+        App app = appMap.get(appName);
+        if(app == null) {
+            try {
+                Class<?> appClass = Class.forName(appName);
+                app = (App) appClass.getMethod("getInstance").invoke(null);
+                appMap.put(appName, app);
+            } catch (ClassNotFoundException e) {
+                Log.e("RULE", "class name " + appName);
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                Log.e("RULE", "class name " + appName);
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                Log.e("RULE", "class name " + appName);
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                Log.e("RULE", "class name " + appName);
+                e.printStackTrace();
+            }
+        }
+        return app;
     }
 
 }

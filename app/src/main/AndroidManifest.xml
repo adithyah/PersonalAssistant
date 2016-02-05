@@ -20,6 +20,8 @@
             android:label="@string/title_activity_create_rule"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+        <service android:name=".WakeUpService"/>
+        <receiver android:name=".WakeUpReceiver"/>
     </application>
 
 </manifest>

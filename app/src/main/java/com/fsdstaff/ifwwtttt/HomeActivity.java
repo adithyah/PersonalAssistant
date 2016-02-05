@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -28,24 +29,24 @@ public class HomeActivity extends AppCompatActivity {
     ListView                ruleLv;
     Button                  createRuleButton;
     AlarmManager            alarmManager;
-    PendingIntent           bdPendIntent;
+    Intent                  broadcastIntent;
     Intent                  bdServiceIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_home);
+
         ArrayAdapter<Rule> ruleAdapter  = new ArrayAdapter<>(this,
                 R.layout.support_simple_spinner_dropdown_item, getRuleList());
         ruleLv                          = (ListView) findViewById(R.id.Rules);
         createRuleButton                = (Button) findViewById(R.id.CreateRule);
         alarmManager                    = (AlarmManager) getSystemService(ALARM_SERVICE);
-        Intent broadcastIntent          = new Intent(this, WakeUpReceiver.class);
-        bdPendIntent                    = PendingIntent.getBroadcast(this, Constants.BD_REC_CODE,
-                broadcastIntent, 0);
+        broadcastIntent                 = new Intent(this, WakeUpReceiver.class);
         bdServiceIntent                 = new Intent(this, WakeUpService.class);
 
         ruleLv.setAdapter(ruleAdapter);
-        setContentView(R.layout.activity_home);
+
     }
 
     @Override
@@ -57,13 +58,14 @@ public class HomeActivity extends AppCompatActivity {
             writeRulesToDisk();
             updateAlarmManager(newRule);
 
-            bdServiceIntent.putExtra(Constants.RECEIVER_ACTIONS, getBdActionList());
+            bdServiceIntent.putExtra(Constants.RECEIVER_ACTIONS, getBdEventList());
             stopService(bdServiceIntent);
             startService(bdServiceIntent);
         }
     }
 
     protected List<Rule> getRuleList(){
+        /*
         if(ruleList == null){
             try {
                 FileInputStream fis = this.openFileInput(Constants.RULES_FILE);
@@ -78,6 +80,8 @@ public class HomeActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+        */
+        ruleList = new ArrayList<>();
         return ruleList;
     }
 
@@ -96,7 +100,7 @@ public class HomeActivity extends AppCompatActivity {
     /*
         This is attached to the onClick listener of the createRuleButton in the XML file
      */
-    protected void createRule(View view){
+    public void createRule(View view){
         Intent intent = new Intent(this, CreateRuleActivity.class);
         startActivityForResult(intent, Constants.CREATE_RULE_CODE);
     }
@@ -105,6 +109,9 @@ public class HomeActivity extends AppCompatActivity {
     protected void updateAlarmManager(Rule newRule){
         When when = newRule.getWhen();
         Calendar cal = CalendarHelper.convertTimeToCal(when.getTriggerTime());
+        Log.d(Constants.DEBUG, "Triggering alarm at: " + (cal.getTimeInMillis() - System.currentTimeMillis()));
+        PendingIntent bdPendIntent = PendingIntent.getBroadcast(this, when.hashCode(),
+                broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         if(when.getTriggerInterval() == 0){
             alarmManager.set(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(), bdPendIntent);
         }
@@ -114,11 +121,11 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    protected ArrayList<String> getBdActionList(){
-        ArrayList<String> bdActionList = new ArrayList<>();
+    protected ArrayList<String> getBdEventList(){
+        ArrayList<String> bdEventList = new ArrayList<>();
         for (Rule rule : ruleList){
-            bdActionList.addAll(rule.getIfActionList());
+            bdEventList.addAll(rule.getIfBdEventList());
         }
-        return bdActionList;
+        return bdEventList;
     }
 }

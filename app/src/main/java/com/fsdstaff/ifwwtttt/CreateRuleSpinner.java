@@ -17,19 +17,19 @@ public class CreateRuleSpinner extends Spinner {
 
     public CreateRuleSpinner(Context context) {
         super(context);
-
+        items = new ArrayList<>();
     }
 
     public CreateRuleSpinner setName(String name){
         this.name = name;
+        this.items.add(0, " -- " + name + " -- ");
         return this;
     }
 
     public CreateRuleSpinner setItems(List<Object> items){
-        this.items = items;
-        List<String> sItems = new ArrayList<>();
+        this.items.addAll(items);
         ArrayAdapter<Object> adapter = new ArrayAdapter<>(getContext(),
-                R.layout.support_simple_spinner_dropdown_item, items);
+                R.layout.support_simple_spinner_dropdown_item, this.items);
         this.setAdapter(adapter);
         return this;
     }
